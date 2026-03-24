@@ -1,0 +1,30 @@
+# iNaturalist / large downloads (do not commit)
+data/inaturalist2021/
+data/processed/
+
+# Local images (add your own; keep folder structure with .gitkeep)
+data/raw/**/*.jpg
+data/raw/**/*.jpeg
+data/raw/**/*.png
+data/raw/**/*.webp
+
+# Generated outputs
+results/*
+!results/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
