@@ -1,0 +1,23 @@
+# Optional: conda environment (alternative to pip + requirements.txt)
+# Create: conda env create -f environment.yml
+# Activate: conda activate plant_clustering
+name: plant_clustering
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.10,<3.13
+  - pip
+  - numpy>=1.21
+  - scipy>=1.7
+  - scikit-learn>=1.0
+  - scikit-image>=0.19
+  - matplotlib>=3.5
+  - seaborn>=0.11
+  - pillow>=9.0
+  - tqdm>=4.62
+  - jupyter
+  - pip:
+    - torch>=1.10.0
+    - torchvision>=0.12.0

@@ -25,8 +25,10 @@ From the proposal:
 ```
 plant_clustering/
 ├── README.md
+├── LICENSE
 ├── requirements.txt
-├── config.py              # Paths, dataset source, k range
+├── environment.yml        # Optional conda env
+├── config.py              # Paths, dataset source, k range, seeds
 ├── data/
 │   ├── raw/               # Local images: trees/, bushes/, flowers/
 │   └── inaturalist2021/   # iNaturalist 2021 (auto-downloaded)
@@ -41,9 +43,18 @@ plant_clustering/
 
 ## Setup
 
+**pip (recommended):**
 ```bash
 pip install -r requirements.txt
 ```
+
+**conda (optional):**
+```bash
+conda env create -f environment.yml
+conda activate plant_clustering
+```
+
+PyTorch: if installs fail, follow [pytorch.org](https://pytorch.org) for your OS/CUDA.
 
 ## Data
 
@@ -73,7 +84,28 @@ Set `config.DATASET_SOURCE = "local"` in config.py.
 
 With iNaturalist (default): first run downloads the dataset; subsequent runs use the cached data. The notebook extracts features, runs K-Means, computes silhouette scores, and visualizes cluster samples.
 
+## Reproducibility
+
+- **Random seed:** `RANDOM_SEED` in `config.py` (used for subsampling and K-Means).
+- **Paths:** All paths are under `config.py` (`DATA_DIR`, `INATURALIST_DIR`, `RESULTS_DIR`).
+- **Figures:** Run the notebook end-to-end; plots are saved under `results/` (e.g. `silhouette_vs_k.png`, `cluster_gallery_cnn.png`).
+
+## Rubric alignment (course final project)
+
+| Criterion | How this repo supports it |
+|-----------|---------------------------|
+| **Technical** | Modular `src/` (data, features, clustering); notebook orchestrates the pipeline. |
+| **Experiments** | Compare raw vs handcrafted vs CNN features; silhouette vs *k*; cluster galleries—extend with ablations (e.g. *k*, `INATURALIST_MAX_IMAGES`, PCA on/off) in the report. |
+| **Contribution** | State your novelty vs proposal: e.g. plant-only iNaturalist subset, three feature families, quantitative + visual evaluation. |
+| **Reproducibility** | This README, `config.py`, seeds, `requirements.txt`, `environment.yml`. |
+| **Deliverable** | Grad: paper-style write-up citing figures from `results/`; Undergrad: optional site/demo + short report. |
+| **GitHub** | README, `requirements.txt`, `environment.yml`, `LICENSE`, `.gitignore`, clear layout. |
+
 ## Repository
 
 - **GitHub:** [https://github.com/D3VTHSTVR/plant_clustering](https://github.com/D3VTHSTVR/plant_clustering)
 - **Branching:** See [BRANCHING.md](BRANCHING.md) (`prod` → main, `dev` integration, `vdev` / `ldev` for individual work).
+
+## License
+
+This project is released under the [MIT License](LICENSE). Dataset terms (e.g. [iNaturalist](https://github.com/visipedia/inat_comp)) apply to downloaded data.
