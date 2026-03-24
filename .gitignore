@@ -28,3 +28,7 @@ env/
 .DS_Store
 .idea/
 .vscode/
+.pytest_cache/
+
+# Large experiment outputs (keep locally; report uses exported figures)
+results/experiments/

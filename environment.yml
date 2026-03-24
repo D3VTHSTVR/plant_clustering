@@ -18,6 +18,7 @@ dependencies:
   - pillow>=9.0
   - tqdm>=4.62
   - jupyter
+  - pytest>=7.0.0
   - pip:
     - torch>=1.10.0
     - torchvision>=0.12.0

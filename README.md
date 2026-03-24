@@ -2,23 +2,13 @@
 
 **Unsupervised Machine Learning for Plant Classification**
 
-Classify plant images (trees, bushes, flowers, etc.) using **K-Means clustering** on different feature representations.
+Group plant images using **K-Means** on multiple feature representations, with full **experimental logging** for the CS 572 graduate final project.
 
 ## Project Overview
 
-From the proposal:
-- **Compare clustering quality** using: raw pixels, handcrafted features, pretrained CNN embeddings
-- **Evaluate** with silhouette score and visual cluster analysis
-- **Focus** on plant type separation (trees, bushes, flowers)
-
-## Pipeline (4 Phases)
-
-| Phase | Tasks |
-|-------|-------|
-| **1. Setup** | Dataset selection, preprocessing |
-| **2. Feature engineering** | Raw pixels, handcrafted (color + HOG), CNN embeddings |
-| **3. Clustering** | K-Means, tune k, silhouette scores |
-| **4. Evaluation** | Visualize clusters, compare methods, report |
+- Compare **raw pixels**, **handcrafted** (color histogram + HOG), and **CNN embeddings**
+- Tune **k** with **silhouette**; report **ARI / NMI** vs taxonomy labels when available (diagnostic)
+- **Reproducible runs:** `scripts/run_experiments.py` saves `metrics.json`, `metrics_table.csv`, figures, and `config_snapshot.json`
 
 ## Project Structure
 
@@ -26,86 +16,127 @@ From the proposal:
 plant_clustering/
 ├── README.md
 ├── LICENSE
+├── CONTRIBUTION.md        # Contribution statement (paste into report)
+├── CITATION.md            # Dataset & paper citations
 ├── requirements.txt
-├── environment.yml        # Optional conda env
-├── config.py              # Paths, dataset source, k range, seeds
+├── environment.yml
+├── pytest.ini
+├── config.py
 ├── data/
-│   ├── raw/               # Local images: trees/, bushes/, flowers/
-│   └── inaturalist2021/   # iNaturalist 2021 (auto-downloaded)
+│   ├── raw/               # Local: trees/, bushes/, flowers/
+│   └── inaturalist2021/   # Auto-downloaded iNaturalist 2021
 ├── src/
-│   ├── data_loader.py     # Load image paths
-│   ├── features.py        # Raw, handcrafted, CNN feature extraction
-│   └── clustering.py      # K-Means, silhouette, PCA
-├── results/               # Plots, cluster galleries
+│   ├── data_loader.py
+│   ├── features.py
+│   ├── clustering.py
+│   ├── evaluation.py      # ARI, NMI, diagnostics, limitation notes
+│   ├── experiment_runner.py
+│   └── visualization.py
+├── scripts/
+│   ├── run_experiments.py    # Full experiment driver (use for report numbers)
+│   └── generate_figures.py   # Regenerate figs from metrics.json
+├── tests/                 # pytest
+├── reports/
+│   └── CS572_Grad_Final_Report.md   # Paper-style template (Grad)
+├── results/               # Figures + experiment runs (see .gitignore)
 └── notebooks/
     └── plant_clustering_pipeline.ipynb
 ```
 
 ## Setup
 
-**pip (recommended):**
+**pip:**
 ```bash
 pip install -r requirements.txt
 ```
 
-**conda (optional):**
+**conda:**
 ```bash
 conda env create -f environment.yml
 conda activate plant_clustering
 ```
 
-PyTorch: if installs fail, follow [pytorch.org](https://pytorch.org) for your OS/CUDA.
+PyTorch: [pytorch.org](https://pytorch.org) if needed.
 
 ## Data
 
-### Option 1: iNaturalist 2021 (default)
+### iNaturalist 2021 (default)
 
-The project uses **iNaturalist 2021** by default. Plant images (kingdom Plantae) are automatically downloaded via torchvision on first run.
+- `config.DATASET_SOURCE = "inaturalist2021"`
+- Plant-only (**Plantae**) subset; first run **downloads** to `data/inaturalist2021/` (~10 GB for `train_mini`)
+- Cap: `INATURALIST_MAX_IMAGES` (default 10k) for feasible runs
 
-- **config.py**: `DATASET_SOURCE = "inaturalist2021"`
-- **Version**: `2021_train_mini` (~500K images; plants subset ~200K)
-- **Subsample**: `INATURALIST_MAX_IMAGES = 10000` for faster runs
-- **Download**: First run downloads to `data/inaturalist2021/` (~10GB for train_mini)
+### Local folders
 
-### Option 2: Local images
+- `data/raw/trees/`, `bushes/`, `flowers/` — set `DATASET_SOURCE = "local"`
 
-Place images in `data/raw/<class>/`:
-- `data/raw/trees/`
-- `data/raw/bushes/`
-- `data/raw/flowers/`
+## Running experiments (recommended for the report)
 
-Set `config.DATASET_SOURCE = "local"` in config.py.
+From the repo root:
 
-## Quick Start
+```bash
+# Full pipeline: metrics + CSV + figures under results/experiments/run_<timestamp>/
+python scripts/run_experiments.py
 
-1. Install: `pip install -r requirements.txt`
-2. Open `notebooks/plant_clustering_pipeline.ipynb`
-3. Run all cells
+# Fast smoke test (fewer images, smaller k grid)
+python scripts/run_experiments.py --quick
 
-With iNaturalist (default): first run downloads the dataset; subsequent runs use the cached data. The notebook extracts features, runs K-Means, computes silhouette scores, and visualizes cluster samples.
+# Skip raw-no-PCA ablation
+python scripts/run_experiments.py --no-ablations
+```
 
-## Reproducibility
+**Regenerate figures** after editing plotting code:
 
-- **Random seed:** `RANDOM_SEED` in `config.py` (used for subsampling and K-Means).
-- **Paths:** All paths are under `config.py` (`DATA_DIR`, `INATURALIST_DIR`, `RESULTS_DIR`).
-- **Figures:** Run the notebook end-to-end; plots are saved under `results/` (e.g. `silhouette_vs_k.png`, `cluster_gallery_cnn.png`).
+```bash
+python scripts/generate_figures.py results/experiments/run_YYYYMMDD_HHMMSS
+```
 
-## Rubric alignment (course final project)
+## Notebook
 
-| Criterion | How this repo supports it |
-|-----------|---------------------------|
-| **Technical** | Modular `src/` (data, features, clustering); notebook orchestrates the pipeline. |
-| **Experiments** | Compare raw vs handcrafted vs CNN features; silhouette vs *k*; cluster galleries—extend with ablations (e.g. *k*, `INATURALIST_MAX_IMAGES`, PCA on/off) in the report. |
-| **Contribution** | State your novelty vs proposal: e.g. plant-only iNaturalist subset, three feature families, quantitative + visual evaluation. |
-| **Reproducibility** | This README, `config.py`, seeds, `requirements.txt`, `environment.yml`. |
-| **Deliverable** | Grad: paper-style write-up citing figures from `results/`; Undergrad: optional site/demo + short report. |
-| **GitHub** | README, `requirements.txt`, `environment.yml`, `LICENSE`, `.gitignore`, clear layout. |
+```bash
+jupyter notebook notebooks/plant_clustering_pipeline.ipynb
+```
+
+Use the notebook for exploration; **cite numbers from `scripts/run_experiments.py`** in the paper for consistency.
+
+## Tests
+
+```bash
+python -m pytest tests/ -v
+```
+
+## Reproducibility (rubric)
+
+| Item | Location |
+|------|----------|
+| Random seed | `RANDOM_SEED` in `config.py` |
+| Hyperparameters | `config.py` (k-range, PCA, K-Means) |
+| Run snapshot | `results/experiments/run_*/config_snapshot.json` |
+| Tables / metrics | `metrics.json`, `metrics_table.csv` |
+| Figure regeneration | `scripts/generate_figures.py` |
+
+## Graduate deliverable (paper)
+
+1. Fill **[reports/CS572_Grad_Final_Report.md](reports/CS572_Grad_Final_Report.md)** (export to PDF with Pandoc/Word/LaTeX).
+2. Copy contribution bullets from **[CONTRIBUTION.md](CONTRIBUTION.md)**.
+3. Add citations per **[CITATION.md](CITATION.md)**.
+
+## Rubric coverage (CS 572 Grad)
+
+| Criterion | What we implemented |
+|-----------|----------------------|
+| **Technical (10)** | Modular pipeline, K-Means + feature extraction, tests, experiment driver |
+| **Experiments (5)** | Baselines (3 features), silhouette + ARI/NMI, PCA ablation, limitation notes |
+| **Contribution (5)** | CONTRIBUTION.md + template Discussion sections |
+| **Reproducibility (3)** | Config, seeds, scripts, saved metrics, figure regeneration |
+| **Deliverable (5)** | Grad report template + figure workflow |
+| **GitHub (2)** | README, requirements, environment.yml, LICENSE, structure |
 
 ## Repository
 
 - **GitHub:** [https://github.com/D3VTHSTVR/plant_clustering](https://github.com/D3VTHSTVR/plant_clustering)
-- **Branching:** See [BRANCHING.md](BRANCHING.md) (`prod` → main, `dev` integration, `vdev` / `ldev` for individual work).
+- **Branching:** [BRANCHING.md](BRANCHING.md)
 
 ## License
 
-This project is released under the [MIT License](LICENSE). Dataset terms (e.g. [iNaturalist](https://github.com/visipedia/inat_comp)) apply to downloaded data.
+[MIT License](LICENSE). Dataset terms apply to iNaturalist data ([CITATION.md](CITATION.md)).
