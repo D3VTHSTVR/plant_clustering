@@ -37,7 +37,7 @@ INATURALIST_MAX_IMAGES = 10000           # Subsample for manageable runs (None =
 IMG_SIZE = (64, 64)       # Smaller for raw pixels (64*64*3 = 12,288); increase for CNN
 IMG_SIZE_CNN = (224, 224) # Standard size for pretrained CNN embeddings
 MAX_IMAGES = None         # Limit for quick experiments (None = use all)
-RANDOM_SEED = 42
+RANDOM_SEED = 69
 
 # ---------------------------------------------------------------------------
 # Feature extraction
@@ -49,9 +49,9 @@ CNN_BACKBONE = "resnet18"  # For embeddings: resnet18, resnet34, vgg16, efficien
 # ---------------------------------------------------------------------------
 # Clustering
 # ---------------------------------------------------------------------------
-K_RANGE = (2, 11)         # Range of k to try (e.g. 2 to 10)
+K_RANGE = (4, 11)         # Range of k to try (e.g. 2 to 10)
 K_MEANS_INIT = "k-means++"
-K_MEANS_N_INIT = 10
+K_MEANS_N_INIT = 30
 K_MEANS_MAX_ITER = 300
 
 # ---------------------------------------------------------------------------
