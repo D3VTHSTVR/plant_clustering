@@ -1,0 +1,1056 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Static project site for Plant Clustering, an unsupervised machine learning pipeline for grouping plant images with K-Means."
+    >
+    <title>Plant Clustering | K-Means on Plant Images</title>
+    <style>
+      :root {
+        --ink: #17211b;
+        --muted: #5a665e;
+        --line: #d8e2d9;
+        --paper: #f8faf6;
+        --panel: #ffffff;
+        --green: #2f7d4f;
+        --green-dark: #1d5636;
+        --moss: #87a96b;
+        --amber: #d99b2b;
+        --blue: #3d6f99;
+        --rose: #b85c5c;
+        --shadow: 0 18px 42px rgba(35, 54, 41, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        line-height: 1.55;
+      }
+
+      a {
+        color: inherit;
+        text-decoration-color: rgba(47, 125, 79, 0.35);
+        text-underline-offset: 0.18em;
+      }
+
+      a:hover {
+        color: var(--green-dark);
+        text-decoration-color: currentColor;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid rgba(216, 226, 217, 0.9);
+        background: rgba(248, 250, 246, 0.88);
+        backdrop-filter: blur(16px);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        width: min(1160px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 14px 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: max-content;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--green-dark);
+        color: white;
+        font-size: 16px;
+        font-weight: 900;
+      }
+
+      .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px 18px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+      }
+
+      .hero {
+        width: min(1160px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 62px 0 34px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+        gap: 44px;
+        align-items: center;
+      }
+
+      .eyebrow {
+        color: var(--green-dark);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 780px;
+        margin-bottom: 18px;
+        font-size: clamp(44px, 6vw, 76px);
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 690px;
+        margin-bottom: 28px;
+        color: #35443a;
+        font-size: 19px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--green-dark);
+        border-radius: 8px;
+        padding: 10px 16px;
+        background: var(--green-dark);
+        color: #fff;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .button.secondary {
+        border-color: var(--line);
+        background: #fff;
+        color: var(--ink);
+      }
+
+      .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        max-width: 760px;
+      }
+
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.7);
+        padding: 14px;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 21px;
+        line-height: 1.1;
+      }
+
+      .stat span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .visual {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(245, 248, 240, 0.96)),
+          #fff;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .visual-top {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        padding: 14px;
+      }
+
+      .plant-tile {
+        position: relative;
+        min-height: 108px;
+        overflow: hidden;
+        border-radius: 8px;
+        background: #dae8d4;
+      }
+
+      .plant-tile::before,
+      .plant-tile::after {
+        position: absolute;
+        content: "";
+      }
+
+      .plant-tile::before {
+        inset: 18% 25% 18% 25%;
+        border-radius: 58% 8% 58% 8%;
+        transform: rotate(-32deg);
+      }
+
+      .plant-tile::after {
+        right: 18%;
+        bottom: 14%;
+        width: 28%;
+        height: 48%;
+        border-radius: 60% 10% 60% 10%;
+        transform: rotate(32deg);
+      }
+
+      .tile-a {
+        background: #dde8d5;
+      }
+
+      .tile-a::before,
+      .tile-a::after {
+        background: var(--green);
+      }
+
+      .tile-b {
+        background: #e8e3d1;
+      }
+
+      .tile-b::before,
+      .tile-b::after {
+        background: var(--amber);
+      }
+
+      .tile-c {
+        background: #d9e4ec;
+      }
+
+      .tile-c::before,
+      .tile-c::after {
+        background: var(--blue);
+      }
+
+      .pipeline {
+        border-top: 1px solid var(--line);
+        padding: 18px 18px 22px;
+      }
+
+      .pipeline-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .pipe-step {
+        min-height: 106px;
+        border: 1px solid #dce7dd;
+        border-radius: 8px;
+        background: #fff;
+        padding: 12px;
+      }
+
+      .pipe-step b {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+
+      .pipe-step span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .mini-chart {
+        display: flex;
+        align-items: end;
+        gap: 5px;
+        height: 46px;
+        margin-top: 12px;
+      }
+
+      .mini-chart i {
+        display: block;
+        width: 100%;
+        border-radius: 4px 4px 0 0;
+        background: var(--green);
+      }
+
+      .cluster-map {
+        position: relative;
+        height: 58px;
+        margin-top: 10px;
+      }
+
+      .dot {
+        position: absolute;
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+      }
+
+      main section {
+        padding: 52px 0;
+      }
+
+      .section-inner {
+        width: min(1160px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .section-heading {
+        display: grid;
+        grid-template-columns: minmax(0, 0.8fr) minmax(320px, 1fr);
+        gap: 36px;
+        align-items: end;
+        margin-bottom: 24px;
+      }
+
+      h2 {
+        margin-bottom: 0;
+        font-size: clamp(28px, 4vw, 44px);
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      .section-heading p {
+        margin-bottom: 0;
+        color: var(--muted);
+      }
+
+      .band {
+        border-block: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .grid-3,
+      .grid-4 {
+        display: grid;
+        gap: 14px;
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 20px;
+      }
+
+      .card h3 {
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+
+      .card p,
+      .card li {
+        color: var(--muted);
+      }
+
+      .card p:last-child,
+      .card ul:last-child {
+        margin-bottom: 0;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        margin-bottom: 12px;
+        border-radius: 999px;
+        padding: 4px 10px;
+        background: #ebf3ec;
+        color: var(--green-dark);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .timeline {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .timeline-step {
+        min-height: 166px;
+        border-right: 1px solid var(--line);
+        padding: 18px;
+      }
+
+      .timeline-step:last-child {
+        border-right: 0;
+      }
+
+      .step-num {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        margin-bottom: 18px;
+        border-radius: 8px;
+        background: var(--ink);
+        color: #fff;
+        font-weight: 850;
+      }
+
+      .timeline-step h3 {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      .timeline-step p {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .code-block {
+        overflow-x: auto;
+        border: 1px solid #cbd8ce;
+        border-radius: 8px;
+        background: #111a15;
+        color: #e9f4ec;
+        padding: 18px;
+      }
+
+      pre {
+        margin: 0;
+        font: 14px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      code {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      .repo-map {
+        display: grid;
+        grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1fr);
+        gap: 18px;
+      }
+
+      .file-list {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .file-list li {
+        display: grid;
+        grid-template-columns: 150px minmax(0, 1fr);
+        gap: 14px;
+        border-bottom: 1px solid #e4ece5;
+        padding-bottom: 10px;
+        color: var(--muted);
+      }
+
+      .file-list li:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .file-list code {
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .metrics {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .metrics th,
+      .metrics td {
+        border-bottom: 1px solid var(--line);
+        padding: 13px 14px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .metrics th {
+        background: #eef5ef;
+        font-size: 13px;
+        text-transform: uppercase;
+      }
+
+      .metrics tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .callout {
+        border-left: 5px solid var(--green);
+        border-radius: 8px;
+        background: #fff;
+        padding: 20px 22px;
+        box-shadow: 0 10px 28px rgba(35, 54, 41, 0.08);
+      }
+
+      .callout p:last-child {
+        margin-bottom: 0;
+      }
+
+      .site-footer {
+        border-top: 1px solid var(--line);
+        padding: 28px 0;
+        background: #17211b;
+        color: #dbe8de;
+      }
+
+      .footer-inner {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        width: min(1160px, calc(100% - 32px));
+        margin: 0 auto;
+        font-size: 14px;
+      }
+
+      .footer-inner a {
+        color: #fff;
+      }
+
+      @media (max-width: 920px) {
+        .hero-grid,
+        .section-heading,
+        .repo-map {
+          grid-template-columns: 1fr;
+        }
+
+        .quick-stats,
+        .grid-4 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid-3,
+        .timeline {
+          grid-template-columns: 1fr;
+        }
+
+        .timeline-step {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .timeline-step:last-child {
+          border-bottom: 0;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .nav {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .nav-links {
+          justify-content: flex-start;
+        }
+
+        .hero {
+          padding-top: 38px;
+        }
+
+        .visual-top,
+        .pipeline-row,
+        .quick-stats,
+        .grid-4 {
+          grid-template-columns: 1fr;
+        }
+
+        .plant-tile {
+          min-height: 84px;
+        }
+
+        .file-list li {
+          grid-template-columns: 1fr;
+          gap: 2px;
+        }
+
+        .metrics {
+          display: block;
+          overflow-x: auto;
+          white-space: nowrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="Primary navigation">
+        <a class="brand" href="#top" aria-label="Plant Clustering home">
+          <span class="brand-mark">PC</span>
+          <span>Plant Clustering</span>
+        </a>
+        <div class="nav-links">
+          <a href="#overview">Overview</a>
+          <a href="#pipeline">Pipeline</a>
+          <a href="#experiments">Experiments</a>
+          <a href="#run">Run</a>
+          <a href="#repo">Repo</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-grid">
+          <div>
+            <p class="eyebrow">Unsupervised machine learning for plant images</p>
+            <h1 id="hero-title">Identifying Plant Types with K-Means</h1>
+            <p class="lead">
+              A reproducible CS 572 graduate project that groups plant images using K-Means
+              across raw pixels, handcrafted image descriptors, and pretrained CNN embeddings.
+            </p>
+            <div class="actions">
+              <a class="button" href="https://github.com/D3VTHSTVR/plant_clustering">View GitHub Repo</a>
+              <a class="button secondary" href="#run">Run Experiments</a>
+            </div>
+            <div class="quick-stats" aria-label="Project highlights">
+              <div class="stat">
+                <strong>3</strong>
+                <span>feature families</span>
+              </div>
+              <div class="stat">
+                <strong>2-10</strong>
+                <span>default k search</span>
+              </div>
+              <div class="stat">
+                <strong>10k</strong>
+                <span>default iNat cap</span>
+              </div>
+              <div class="stat">
+                <strong>42</strong>
+                <span>random seed</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="visual" aria-label="Plant image clustering visual summary">
+            <div class="visual-top">
+              <div class="plant-tile tile-a" aria-hidden="true"></div>
+              <div class="plant-tile tile-b" aria-hidden="true"></div>
+              <div class="plant-tile tile-c" aria-hidden="true"></div>
+            </div>
+            <div class="pipeline">
+              <div class="pipeline-row">
+                <div class="pipe-step">
+                  <b>Images</b>
+                  <span>iNaturalist Plantae or local folders</span>
+                </div>
+                <div class="pipe-step">
+                  <b>Features</b>
+                  <span>Pixels, color plus HOG, ResNet embeddings</span>
+                  <div class="mini-chart" aria-hidden="true">
+                    <i style="height: 42%"></i>
+                    <i style="height: 78%; background: var(--amber)"></i>
+                    <i style="height: 58%; background: var(--blue)"></i>
+                  </div>
+                </div>
+                <div class="pipe-step">
+                  <b>K-Means</b>
+                  <span>Grid search chooses k by silhouette</span>
+                </div>
+                <div class="pipe-step">
+                  <b>Clusters</b>
+                  <span>Metrics, figures, and diagnostics</span>
+                  <div class="cluster-map" aria-hidden="true">
+                    <span class="dot" style="left: 10%; top: 24%; background: var(--green)"></span>
+                    <span class="dot" style="left: 18%; top: 45%; background: var(--green)"></span>
+                    <span class="dot" style="left: 30%; top: 28%; background: var(--green)"></span>
+                    <span class="dot" style="left: 55%; top: 18%; background: var(--amber)"></span>
+                    <span class="dot" style="left: 66%; top: 36%; background: var(--amber)"></span>
+                    <span class="dot" style="left: 78%; top: 26%; background: var(--amber)"></span>
+                    <span class="dot" style="left: 48%; top: 70%; background: var(--blue)"></span>
+                    <span class="dot" style="left: 64%; top: 76%; background: var(--blue)"></span>
+                    <span class="dot" style="left: 82%; top: 66%; background: var(--blue)"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="overview" class="band" aria-labelledby="overview-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <h2 id="overview-title">Project Overview</h2>
+            <p>
+              The project explores whether unsupervised visual groupings can reveal useful
+              structure in plant image collections without training a supervised classifier.
+            </p>
+          </div>
+
+          <div class="grid-3">
+            <article class="card">
+              <span class="tag">Problem</span>
+              <h3>Discover visual plant groups</h3>
+              <p>
+                Given a collection of plant images, the pipeline clusters images by visual
+                similarity and evaluates how those groups compare with available taxonomy labels.
+              </p>
+            </article>
+            <article class="card">
+              <span class="tag">Approach</span>
+              <h3>Compare feature representations</h3>
+              <p>
+                It tests flattened raw pixels, handcrafted color histogram plus HOG descriptors,
+                and CNN embeddings from a pretrained ResNet-style backbone.
+              </p>
+            </article>
+            <article class="card">
+              <span class="tag">Deliverable</span>
+              <h3>Reproducible experiment bundle</h3>
+              <p>
+                Each run saves metrics, tables, figures, limitation notes, and a config snapshot
+                for consistent reporting.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="pipeline" aria-labelledby="pipeline-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <h2 id="pipeline-title">Pipeline</h2>
+            <p>
+              The repo separates data loading, feature extraction, clustering, evaluation,
+              visualization, and experiment orchestration into focused Python modules.
+            </p>
+          </div>
+
+          <div class="timeline" aria-label="Pipeline steps">
+            <article class="timeline-step">
+              <div class="step-num">1</div>
+              <h3>Load Images</h3>
+              <p>Use iNaturalist 2021 Plantae images or local ImageFolder-style data.</p>
+            </article>
+            <article class="timeline-step">
+              <div class="step-num">2</div>
+              <h3>Extract Features</h3>
+              <p>Build raw pixel, handcrafted, or CNN embedding matrices.</p>
+            </article>
+            <article class="timeline-step">
+              <div class="step-num">3</div>
+              <h3>Preprocess</h3>
+              <p>Standardize features and apply PCA to raw pixels when enabled.</p>
+            </article>
+            <article class="timeline-step">
+              <div class="step-num">4</div>
+              <h3>Cluster</h3>
+              <p>Run K-Means with k-means++ initialization across the configured k range.</p>
+            </article>
+            <article class="timeline-step">
+              <div class="step-num">5</div>
+              <h3>Evaluate</h3>
+              <p>Report silhouette, ARI, NMI, cluster balance, and per-cluster diagnostics.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="methods" class="band" aria-labelledby="methods-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <h2 id="methods-title">Methods</h2>
+            <p>
+              The implementation is designed for comparison rather than a single model choice,
+              so the same clustering and evaluation flow can be applied to each feature space.
+            </p>
+          </div>
+
+          <div class="grid-4">
+            <article class="card">
+              <h3>Raw Pixels</h3>
+              <p>
+                Images are resized to 64 by 64 RGB, normalized to [0, 1], flattened, standardized,
+                and optionally reduced with PCA.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Handcrafted Features</h3>
+              <p>
+                Color histograms capture coarse RGB distribution while HOG captures local shape
+                and texture cues.
+              </p>
+            </article>
+            <article class="card">
+              <h3>CNN Embeddings</h3>
+              <p>
+                Pretrained CNN features use 224 by 224 inputs and remove the classifier head to
+                produce image embeddings for clustering.
+              </p>
+            </article>
+            <article class="card">
+              <h3>K Selection</h3>
+              <p>
+                The default search tries k from 2 through 10 and selects the best value by mean
+                silhouette score.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="experiments" aria-labelledby="experiments-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <h2 id="experiments-title">Experiments and Outputs</h2>
+            <p>
+              The recommended workflow is the scripted experiment runner. Notebook exploration is
+              supported, but report numbers should come from saved experiment runs.
+            </p>
+          </div>
+
+          <table class="metrics">
+            <thead>
+              <tr>
+                <th>Output</th>
+                <th>Purpose</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>metrics.json</code></td>
+                <td>Complete structured results for each feature and ablation.</td>
+                <td><code>results/experiments/run_*/</code></td>
+              </tr>
+              <tr>
+                <td><code>metrics_table.csv</code></td>
+                <td>Flat table for the graduate report: feature, best k, silhouette, ARI, NMI.</td>
+                <td><code>results/experiments/run_*/</code></td>
+              </tr>
+              <tr>
+                <td><code>fig_silhouette_vs_k.png</code></td>
+                <td>Shows how cluster quality changes across candidate k values.</td>
+                <td><code>results/experiments/run_*/</code></td>
+              </tr>
+              <tr>
+                <td><code>fig_feature_silhouette_bar.png</code></td>
+                <td>Compares the best silhouette score across feature families.</td>
+                <td><code>results/experiments/run_*/</code></td>
+              </tr>
+              <tr>
+                <td><code>config_snapshot.json</code></td>
+                <td>Records dataset, seed, feature list, k range, and model settings.</td>
+                <td><code>results/experiments/run_*/</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="data" class="band" aria-labelledby="data-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <h2 id="data-title">Data Sources</h2>
+            <p>
+              The default configuration uses iNaturalist 2021, filtered to Plantae. A local folder
+              mode is also available for smaller custom datasets.
+            </p>
+          </div>
+
+          <div class="grid-3">
+            <article class="card">
+              <h3>iNaturalist 2021</h3>
+              <p>
+                Uses <code>torchvision.datasets.INaturalist</code>, filters categories whose
+                kingdom is Plantae, and subsamples with the configured random seed.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Local Image Folders</h3>
+              <p>
+                Supports folder labels such as <code>data/raw/trees/</code>,
+                <code>data/raw/bushes/</code>, and <code>data/raw/flowers/</code>.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Diagnostic Labels</h3>
+              <p>
+                Labels are not used to train the clusters. They are only used after clustering for
+                ARI and NMI diagnostics.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="run" aria-labelledby="run-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <h2 id="run-title">Run the Project</h2>
+            <p>
+              The site is static, but the project itself is a Python experiment package with pip
+              and conda setup options.
+            </p>
+          </div>
+
+          <div class="repo-map">
+            <div class="card">
+              <h3>Setup</h3>
+              <div class="code-block">
+                <pre><code>pip install -r requirements.txt
+
+# or
+conda env create -f environment.yml
+conda activate plant_clustering</code></pre>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Experiments</h3>
+              <div class="code-block">
+                <pre><code>python scripts/run_experiments.py
+python scripts/run_experiments.py --quick
+python scripts/run_experiments.py --no-ablations
+
+python scripts/generate_figures.py results/experiments/run_YYYYMMDD_HHMMSS
+python -m pytest tests/ -v</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="repo" class="band" aria-labelledby="repo-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <h2 id="repo-title">Repository Map</h2>
+            <p>
+              The codebase is intentionally modular so experiment settings, feature code, metrics,
+              figures, and report materials stay easy to inspect.
+            </p>
+          </div>
+
+          <div class="repo-map">
+            <div class="callout">
+              <p>
+                The graduate report template is in
+                <a href="reports/CS572_Grad_Final_Report.md"><code>reports/CS572_Grad_Final_Report.md</code></a>.
+                Contribution notes and citations live in
+                <a href="CONTRIBUTION.md"><code>CONTRIBUTION.md</code></a> and
+                <a href="CITATION.md"><code>CITATION.md</code></a>.
+              </p>
+            </div>
+            <ul class="file-list" aria-label="Repository files and folders">
+              <li><code>config.py</code><span>Dataset source, image sizes, k range, PCA, seed, and feature settings.</span></li>
+              <li><code>src/data_loader.py</code><span>iNaturalist and local folder loading utilities.</span></li>
+              <li><code>src/features.py</code><span>Raw pixel, handcrafted, and CNN embedding extraction.</span></li>
+              <li><code>src/clustering.py</code><span>K-Means, silhouette tuning, standardization, and PCA helpers.</span></li>
+              <li><code>src/evaluation.py</code><span>ARI, NMI, cluster statistics, silhouette breakdown, and limitation notes.</span></li>
+              <li><code>src/visualization.py</code><span>Figure generation for silhouette curves, feature comparisons, and cluster sizes.</span></li>
+              <li><code>scripts/</code><span>Runnable experiment and figure regeneration entry points.</span></li>
+              <li><code>tests/</code><span>Pytest coverage for clustering and evaluation behavior.</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="reproducibility" aria-labelledby="repro-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <h2 id="repro-title">Reproducibility</h2>
+            <p>
+              Runs are designed to leave an audit trail: the same seed, config snapshot, scripts,
+              and saved result artifacts support consistent reporting.
+            </p>
+          </div>
+
+          <div class="grid-4">
+            <article class="card">
+              <h3>Seed</h3>
+              <p><code>RANDOM_SEED = 42</code> in <code>config.py</code>.</p>
+            </article>
+            <article class="card">
+              <h3>Hyperparameters</h3>
+              <p>Feature list, k range, K-Means settings, image sizes, and PCA settings are centralized.</p>
+            </article>
+            <article class="card">
+              <h3>Run Snapshot</h3>
+              <p><code>config_snapshot.json</code> records the settings used for each experiment run.</p>
+            </article>
+            <article class="card">
+              <h3>Report Tables</h3>
+              <p><code>metrics_table.csv</code> is generated from the same run bundle as the figures.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <span>Plant Clustering, CS 572 graduate project.</span>
+        <span>
+          <a href="https://github.com/D3VTHSTVR/plant_clustering">GitHub</a>
+          &nbsp;/&nbsp;
+          <a href="LICENSE">MIT License</a>
+        </span>
+      </div>
+    </footer>
+  </body>
+</html>
